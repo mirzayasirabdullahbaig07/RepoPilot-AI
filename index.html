@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RepoPilot AI — Built with IBM watsonx Code Assistant (Bob)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080d1a;--bg2:#0d1424;--bg3:#111a2e;--sur:#16203a;--sur2:#1c2947;
+  --bdr:#1f2f52;--bdr2:#2d4070;
+  --tx:#dde6f5;--tx2:#7d97c8;--tx3:#3d5280;
+  --ac:#4d8fff;--ac2:#7aadff;--glow:rgba(77,143,255,.15);--glow2:rgba(77,143,255,.07);
+  --gr:#1fce85;--rd:#ff4f70;--am:#f5a623;--pu:#a78bfa;--tl:#2dd4bf;
+  --fh:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--fm:'JetBrains Mono',monospace;
+  --r:10px;--r2:6px;
+}
+html,body{height:100%;font-family:var(--fb);background:var(--bg);color:var(--tx);font-size:14px;line-height:1.6;overflow:hidden}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:2px}
+
+/* Layout */
+#root{display:flex;flex-direction:column;height:100vh}
+#hdr{display:flex;align-items:center;gap:12px;padding:0 20px;height:52px;border-bottom:1px solid var(--bdr);background:var(--bg2);flex-shrink:0}
+#body{display:flex;flex:1;overflow:hidden}
+#sb{width:248px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--bdr);display:flex;flex-direction:column;overflow:hidden}
+#pnl{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* Header */
+.logo{display:flex;align-items:center;gap:8px;font-family:var(--fh);font-size:18px;font-weight:800;color:var(--tx)}
+.logo-ic{width:29px;height:29px;background:linear-gradient(135deg,var(--ac),var(--pu));border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.pill{font-size:10px;padding:2px 8px;border-radius:20px;font-family:var(--fm);background:var(--glow);border:1px solid var(--bdr2);color:var(--ac2)}
+.pill-ibm{font-size:10px;padding:2px 10px;border-radius:20px;font-family:var(--fm);background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3);color:var(--pu);display:flex;align-items:center;gap:5px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--gr);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* Sidebar */
+.sb-in{flex:1;overflow-y:auto;padding:10px}
+.sb-lbl{font-size:10px;font-weight:600;letter-spacing:.1em;color:var(--tx3);text-transform:uppercase;padding:0 4px;margin:10px 0 5px}
+.nb{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:var(--r2);cursor:pointer;color:var(--tx2);font-size:12.5px;transition:.12s;width:100%;background:none;border:1px solid transparent;text-align:left}
+.nb:hover{background:var(--sur);color:var(--tx)}
+.nb.active{background:var(--glow);border-color:var(--bdr2);color:var(--ac)}
+.nb i{width:14px;text-align:center;font-size:12px}
+.sb-ft{padding:10px;border-top:1px solid var(--bdr);font-size:11.5px}
+.sb-rn{font-weight:600;color:var(--tx);word-break:break-all;margin-bottom:3px}
+.sb-st{display:flex;gap:8px;color:var(--tx3);font-size:11px}
+.sb-tr{font-family:var(--fm);font-size:10.5px;color:var(--tx3);margin-top:6px;max-height:140px;overflow-y:auto}
+.tr-r{padding:2px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tr-d{color:var(--ac)}
+
+/* Input bar */
+#ibar{padding:12px 20px;border-bottom:1px solid var(--bdr);background:var(--bg2);flex-shrink:0}
+.irow{display:flex;gap:8px;align-items:flex-end}
+.ig{display:flex;flex-direction:column;gap:4px}
+.ig label{font-size:10.5px;color:var(--tx3);font-weight:500}
+.ifield{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r2);padding:7px 11px;font-family:var(--fb);font-size:13px;color:var(--tx);outline:none;transition:.12s;width:100%}
+.ifield:focus{border-color:var(--ac);box-shadow:0 0 0 3px var(--glow)}
+.ifield::placeholder{color:var(--tx3)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:var(--r2);font-family:var(--fb);font-size:13px;font-weight:500;cursor:pointer;transition:.12s;border:none;white-space:nowrap}
+.btn-p{background:var(--ac);color:#fff}
+.btn-p:hover:not(:disabled){background:var(--ac2);color:#000}
+.btn-p:disabled{opacity:.5;cursor:not-allowed}
+.btn-g{background:var(--sur);border:1px solid var(--bdr);color:var(--tx2)}
+.btn-g:hover{border-color:var(--bdr2);color:var(--tx)}
+.btn-sm{padding:5px 11px;font-size:11.5px}
+.hints{margin-top:6px;font-size:11px;color:var(--tx3);display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.hl{color:var(--ac);cursor:pointer;font-family:var(--fm)}.hl:hover{text-decoration:underline}
+#prog{display:none;margin-top:7px}
+#ptxt{font-size:11.5px;color:var(--tx2);margin-bottom:4px}
+.pbar{height:3px;background:var(--bdr);border-radius:2px;overflow:hidden}
+.pfill{height:100%;background:linear-gradient(90deg,var(--ac),var(--pu));border-radius:2px;transition:width .8s ease}
+.errbox{display:none;margin-top:7px;padding:9px 13px;background:rgba(255,79,112,.09);border:1px solid rgba(255,79,112,.3);border-radius:var(--r2);color:var(--rd);font-size:12.5px;align-items:center;gap:8px}
+
+/* Tabs */
+#tabs{display:flex;border-bottom:1px solid var(--bdr);background:var(--bg2);padding:0 20px;flex-shrink:0;overflow-x:auto}
+.tab{padding:10px 14px;font-size:12.5px;cursor:pointer;border-bottom:2px solid transparent;color:var(--tx2);transition:.12s;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.tab:hover{color:var(--tx)}.tab.active{color:var(--ac);border-bottom-color:var(--ac)}
+
+/* Content */
+#ct{flex:1;overflow-y:auto;padding:18px 20px}
+
+/* Cards */
+.card{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:16px}
+.chd{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.ctit{font-family:var(--fh);font-size:14px;font-weight:700}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.mt{margin-top:12px}
+
+/* Stat */
+.stat{background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--r);padding:13px;text-align:center}
+.sn{font-size:24px;font-family:var(--fh);font-weight:700}
+.sl{font-size:10.5px;color:var(--tx3);margin-top:2px}
+
+/* Tags */
+.tag{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.ta{background:rgba(77,143,255,.1);color:var(--ac2);border:1px solid rgba(77,143,255,.2)}
+.tg{background:rgba(31,206,133,.1);color:var(--gr);border:1px solid rgba(31,206,133,.2)}
+.tp{background:rgba(167,139,250,.1);color:var(--pu);border:1px solid rgba(167,139,250,.2)}
+.tam{background:rgba(245,166,35,.1);color:var(--am);border:1px solid rgba(245,166,35,.2)}
+.tr_{background:rgba(255,79,112,.1);color:var(--rd);border:1px solid rgba(255,79,112,.2)}
+
+/* Bob banner */
+.bob{display:flex;align-items:center;gap:12px;padding:11px 15px;background:linear-gradient(90deg,rgba(77,143,255,.06),rgba(167,139,250,.06));border:1px solid var(--bdr);border-radius:var(--r);margin-bottom:14px}
+.bob i{font-size:20px;color:var(--ac)}
+.bob-t{font-size:12px;color:var(--tx2);line-height:1.4}
+.bob-t strong{color:var(--tx)}
+.bob-r{margin-left:auto;text-align:right;font-size:11px;color:var(--tx3);flex-shrink:0}
+
+/* IBM Bob credit banner */
+.ibm-credit{display:flex;align-items:center;gap:10px;padding:9px 14px;background:linear-gradient(90deg,rgba(167,139,250,.07),rgba(77,143,255,.05));border:1px solid rgba(167,139,250,.2);border-radius:var(--r2);margin-bottom:12px;font-size:11.5px;color:var(--tx2)}
+.ibm-credit i{color:var(--pu);font-size:13px}
+.ibm-credit strong{color:var(--pu)}
+
+/* Arch nodes */
+.ng{display:grid;grid-template-columns:repeat(auto-fill,minmax(125px,1fr));gap:8px}
+.an{border-radius:var(--r2);padding:10px;border:1px solid;text-align:center;cursor:pointer;transition:.14s}
+.an:hover{transform:translateY(-2px);filter:brightness(1.1)}
+.an-a{background:rgba(77,143,255,.08);border-color:rgba(77,143,255,.28);color:var(--ac)}
+.an-p{background:rgba(167,139,250,.08);border-color:rgba(167,139,250,.28);color:var(--pu)}
+.an-g{background:rgba(31,206,133,.08);border-color:rgba(31,206,133,.28);color:var(--gr)}
+.an-t{background:rgba(45,212,191,.08);border-color:rgba(45,212,191,.28);color:var(--tl)}
+.an-am{background:rgba(245,166,35,.08);border-color:rgba(245,166,35,.28);color:var(--am)}
+.an-r{background:rgba(255,79,112,.08);border-color:rgba(255,79,112,.28);color:var(--rd)}
+.an-ic{font-size:17px;margin-bottom:4px}
+.an-nm{font-weight:600;font-size:11.5px}
+.an-tp{font-size:10px;opacity:.6;margin-top:1px}
+
+/* Edge */
+.edge{display:flex;align-items:center;gap:7px;padding:6px 9px;background:var(--bg3);border-radius:var(--r2);font-size:12px;margin-bottom:5px}
+.efr{color:var(--ac)}.eto{color:var(--tx2)}.elb{margin-left:auto;color:var(--tx3);font-size:10.5px;font-family:var(--fm)}
+
+/* Entry/Module/Tech/Dep */
+.entry{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--r2);margin-bottom:6px}
+.entry i{color:var(--am);margin-top:2px}
+.ef{font-family:var(--fm);font-size:11.5px;font-weight:500;color:var(--tx)}
+.ed{font-size:11px;color:var(--tx3);margin-top:2px}
+.mod{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:var(--bg3);border-radius:var(--r2);margin-bottom:6px}
+.mod-ic{width:28px;height:28px;background:var(--glow);border-radius:var(--r2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mn{font-weight:600;font-size:12px}.mp{font-family:var(--fm);font-size:10px;color:var(--tx3)}.mr{font-size:11.5px;color:var(--tx2);margin-top:3px}
+.tech{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--r2);transition:.12s}
+.tech:hover{border-color:var(--bdr2)}
+.tic{width:30px;height:30px;border-radius:var(--r2);background:var(--glow);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.tnm{font-weight:600;font-size:12.5px}.tct{font-size:10px;color:var(--tx3)}.tpu{font-size:11px;color:var(--tx2);margin-top:2px}
+.dep{padding:6px 9px;background:var(--bg3);border-radius:var(--r2);margin-bottom:5px;border:1px solid var(--bdr)}
+.dnm{font-family:var(--fm);font-size:11.5px;color:var(--ac2)}.dpu{font-size:11px;color:var(--tx3);margin-top:1px}
+
+/* Steps */
+.step{display:flex;gap:11px;padding:11px 0;border-bottom:1px solid var(--bdr)}
+.step:last-child{border-bottom:none}
+.snum{width:30px;height:30px;border-radius:50%;background:var(--glow);border:1px solid var(--ac);color:var(--ac);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;font-family:var(--fh)}
+.sh{font-size:13px;font-weight:600;margin-bottom:2px}.sd{font-size:12px;color:var(--tx2);line-height:1.5}
+.sf{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.fc{font-family:var(--fm);font-size:10px;padding:2px 6px;background:var(--bg);border:1px solid var(--bdr);border-radius:3px;color:var(--tx3)}
+
+/* Tips */
+.tip{display:flex;gap:8px;padding:8px;border-radius:var(--r2);border:1px solid;margin-bottom:6px;font-size:12px;line-height:1.5}
+.tw{background:rgba(255,79,112,.06);border-color:rgba(255,79,112,.2);color:var(--tx2)}
+.tq{background:rgba(31,206,133,.06);border-color:rgba(31,206,133,.2);color:var(--tx2)}
+
+/* Layer */
+.layer{padding:6px 10px;background:var(--bg3);border-left:3px solid var(--ac);border-radius:0 var(--r2) var(--r2) 0;font-size:12px;color:var(--tx2);margin-bottom:4px}
+
+/* Chat */
+#cwrap{flex:1;overflow-y:auto;padding:14px 20px;display:flex;flex-direction:column;gap:11px}
+.msg{display:flex;gap:9px;max-width:92%}
+.msg.user{align-self:flex-end;flex-direction:row-reverse}
+.av{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px}
+.av-ai{background:linear-gradient(135deg,var(--ac),var(--pu));color:#fff}
+.av-u{background:var(--sur2);color:var(--tx2);border:1px solid var(--bdr)}
+.bub{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:9px 13px;font-size:13px;line-height:1.6}
+.msg.user .bub{background:var(--glow2);border-color:var(--bdr2)}
+.bub pre{background:var(--bg);border:1px solid var(--bdr);border-radius:var(--r2);padding:9px;font-family:var(--fm);font-size:11px;overflow-x:auto;margin:6px 0}
+.bub code{font-family:var(--fm);font-size:11px;background:var(--bg3);padding:1px 4px;border-radius:3px;color:var(--ac2)}
+.bub p{margin-bottom:6px}.bub p:last-child{margin:0}
+.bub h1,.bub h2,.bub h3{font-size:13px;font-weight:600;margin:7px 0 3px;color:var(--tx)}
+.bub ul,.bub ol{padding-left:17px;margin:4px 0}.bub li{margin:2px 0}
+.bub strong{color:var(--tx)}
+.cbar{padding:10px 20px;border-top:1px solid var(--bdr);display:flex;gap:8px;flex-shrink:0}
+#cinput{flex:1;background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r2);padding:8px 11px;font-family:var(--fb);font-size:13px;color:var(--tx);outline:none;resize:none;transition:.12s;max-height:88px}
+#cinput:focus{border-color:var(--ac);box-shadow:0 0 0 3px var(--glow)}
+#cinput::placeholder{color:var(--tx3)}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.chip{padding:4px 9px;background:var(--sur);border:1px solid var(--bdr);border-radius:20px;font-size:11px;color:var(--tx2);cursor:pointer;transition:.12s}
+.chip:hover{border-color:var(--ac);color:var(--ac)}
+
+/* Guide markdown */
+.mdb{font-size:13px;line-height:1.7;color:var(--tx2)}
+.mdb h1{font-size:19px;font-family:var(--fh);color:var(--tx);border-bottom:1px solid var(--bdr);padding-bottom:7px;margin:0 0 12px}
+.mdb h2{font-size:15px;font-family:var(--fh);color:var(--tx);margin:15px 0 7px}
+.mdb h3{font-size:13px;font-weight:600;color:var(--tx);margin:10px 0 5px}
+.mdb code{font-family:var(--fm);font-size:11px;background:var(--bg3);padding:1px 4px;border-radius:3px;color:var(--ac2)}
+.mdb pre{background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--r2);padding:11px;overflow-x:auto;margin:7px 0}
+.mdb pre code{background:none;padding:0;color:var(--tx)}
+.mdb ul,.mdb ol{padding-left:17px;margin:4px 0}.mdb li{margin:3px 0}
+.mdb blockquote{border-left:3px solid var(--ac);padding:6px 13px;margin:7px 0;background:var(--glow2);border-radius:0 var(--r2) var(--r2) 0}
+.mdb p{margin-bottom:8px}.mdb hr{border:none;border-top:1px solid var(--bdr);margin:14px 0}
+.mdb table{width:100%;border-collapse:collapse;margin:7px 0;font-size:12px}
+.mdb th{background:var(--bg3);color:var(--tx);padding:6px 9px;border:1px solid var(--bdr);text-align:left}
+.mdb td{padding:5px 9px;border:1px solid var(--bdr);color:var(--tx2)}
+.mdb a{color:var(--ac)}.mdb strong{color:var(--tx)}
+
+/* Empty */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;color:var(--tx3);text-align:center;padding:30px}
+.eico{font-size:48px;opacity:.2}
+.empty h2{font-family:var(--fh);font-size:18px;color:var(--tx2);font-weight:700}
+.empty p{font-size:13px;max-width:360px;line-height:1.6}
+
+/* Spinner */
+.spin{width:15px;height:15px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite;display:inline-block;vertical-align:middle}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* Stitle */
+.stitle{font-family:var(--fh);font-size:15px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.stitle i{color:var(--ac);font-size:13px}
+
+@media(max-width:800px){#sb{display:none}.g4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:550px){.g2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="root">
+
+<!-- HEADER -->
+<div id="hdr">
+  <div class="logo"><div class="logo-ic">🧭</div>RepoPilot<span style="color:var(--ac)"> AI</span></div>
+  <div class="pill">IBM Bob Hackathon 2026</div>
+  <div class="pill-ibm"><i class="fa fa-cube"></i> Built with IBM watsonx Code Assistant (Bob)</div>
+  <div style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--tx3)">
+    <div class="dot"></div> Groq + LLaMA 3.3
+  </div>
+</div>
+
+<!-- BODY -->
+<div id="body">
+
+  <!-- SIDEBAR -->
+  <div id="sb">
+    <div class="sb-in">
+      <div class="sb-lbl">Navigation</div>
+      <button class="nb active" data-tab="overview"  onclick="goTab('overview')"><i class="fa fa-home"></i> Overview</button>
+      <button class="nb"        data-tab="arch"      onclick="goTab('arch')"><i class="fa fa-sitemap"></i> Architecture</button>
+      <button class="nb"        data-tab="stack"     onclick="goTab('stack')"><i class="fa fa-layer-group"></i> Tech Stack</button>
+      <button class="nb"        data-tab="onboard"   onclick="goTab('onboard')"><i class="fa fa-map-signs"></i> Onboarding Path</button>
+      <button class="nb"        data-tab="chat"      onclick="goTab('chat')"><i class="fa fa-comments"></i> Ask the Codebase</button>
+      <button class="nb"        data-tab="guide"     onclick="goTab('guide')"><i class="fa fa-book"></i> Dev Guide</button>
+      <div class="sb-lbl" id="sb-rl" style="display:none">Repository</div>
+    </div>
+    <div class="sb-ft" id="sb-ft" style="display:none">
+      <div class="sb-rn" id="sb-rn"></div>
+      <div class="sb-st" id="sb-st"></div>
+      <div class="sb-tr" id="sb-tr"></div>
+    </div>
+  </div>
+
+  <!-- PANEL -->
+  <div id="pnl">
+
+    <!-- INPUT BAR — URL only, no API key field -->
+    <div id="ibar">
+      <div class="irow">
+        <div class="ig" style="flex:1">
+          <label>GitHub Repository URL</label>
+          <input class="ifield" id="f-url" type="text" placeholder="https://github.com/owner/repo  — paste any public GitHub repo URL"/>
+        </div>
+        <button class="btn btn-p" id="abtn" onclick="runAnalysis()">
+          <i class="fa fa-rocket"></i> Analyze Repo
+        </button>
+      </div>
+      <div class="hints">
+        Try:
+        <span class="hl" onclick="setRepo('https://github.com/fastapi/fastapi')">fastapi/fastapi</span> ·
+        <span class="hl" onclick="setRepo('https://github.com/expressjs/express')">express</span> ·
+        <span class="hl" onclick="setRepo('https://github.com/django/django')">django</span> ·
+        <span class="hl" onclick="setRepo('https://github.com/vuejs/vue')">vue</span> ·
+        <span class="hl" onclick="setRepo('https://github.com/vercel/next.js')">next.js</span>
+      </div>
+      <div id="prog">
+        <div id="ptxt">Loading…</div>
+        <div class="pbar"><div class="pfill" id="pfill" style="width:0%"></div></div>
+      </div>
+      <div class="errbox" id="errbox"><i class="fa fa-exclamation-circle"></i><span id="errtxt"></span></div>
+    </div>
+
+    <!-- TABS -->
+    <div id="tabs">
+      <div class="tab active" data-tab="overview" onclick="goTab('overview')"><i class="fa fa-home"></i> Overview</div>
+      <div class="tab" data-tab="arch"    onclick="goTab('arch')"><i class="fa fa-sitemap"></i> Architecture</div>
+      <div class="tab" data-tab="stack"   onclick="goTab('stack')"><i class="fa fa-layer-group"></i> Tech Stack</div>
+      <div class="tab" data-tab="onboard" onclick="goTab('onboard')"><i class="fa fa-map-signs"></i> Onboarding</div>
+      <div class="tab" data-tab="chat"    onclick="goTab('chat')"><i class="fa fa-comments"></i> Ask Codebase</div>
+      <div class="tab" data-tab="guide"   onclick="goTab('guide')"><i class="fa fa-book"></i> Dev Guide</div>
+    </div>
+
+    <!-- CONTENT -->
+    <div id="ct"></div>
+
+    <!-- CHAT BAR -->
+    <div class="cbar" id="cbar" style="display:none">
+      <textarea id="cinput" rows="1" placeholder="Ask anything about this codebase… (Enter to send)" onkeydown="ck(event)" oninput="ar(this)"></textarea>
+      <button class="btn btn-p" onclick="sendChat()"><i class="fa fa-paper-plane"></i></button>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════
+   ── DEVELOPER: SET YOUR GROQ KEY HERE ──
+   Users never see or touch this value.
+═══════════════════════════════════════════ */
+const GROQ_API_KEY = 'YOUR_GROQ_API_KEY_HERE';
+/* ═══════════════════════════════════════════ */
+
+const MODEL_ID = 'llama-3.3-70b-versatile';
+
+/* STATE */
+const S = { tab:'overview', data:null, ctx:'', history:[], guide:null };
+
+/* ═══════════════════════════════════════════
+   GROQ
+═══════════════════════════════════════════ */
+async function groq(messages, maxTokens=4096) {
+  const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${GROQ_API_KEY}` },
+    body: JSON.stringify({ model: MODEL_ID, messages, max_tokens: maxTokens, temperature: 0.3 }),
+  });
+  if (!r.ok) {
+    const e = await r.json().catch(()=>({error:{message:r.statusText}}));
+    throw new Error(e.error?.message || `Groq error ${r.status}`);
+  }
+  return (await r.json()).choices[0].message.content;
+}
+
+function parseJSON(raw) {
+  const clean = raw.replace(/```(?:json)?\n?/g,'').replace(/```/g,'').trim();
+  try { return JSON.parse(clean); } catch {}
+  const m = clean.match(/\{[\s\S]*\}/);
+  if (m) { try { return JSON.parse(m[0]); } catch {} }
+  return { raw_analysis: raw };
+}
+
+/* ═══════════════════════════════════════════
+   GITHUB
+═══════════════════════════════════════════ */
+function parseUrl(url) {
+  url = url.trim().replace(/\.git$/, '').replace(/\/$/, '');
+  const m = url.match(/github\.com\/([^/\s]+)\/([^/\s?#]+)/);
+  if (!m) throw new Error('Invalid GitHub URL — paste something like: https://github.com/fastapi/fastapi');
+  return { owner: m[1], repo: m[2] };
+}
+
+async function ghGet(path) {
+  const urls = [
+    `https://api.github.com${path}`,
+    `https://cors.isomorphic-git.org/github.com${path}`,
+  ];
+  for (const url of urls) {
+    try {
+      const r = await fetch(url, {
+        headers: { Accept:'application/vnd.github+json' },
+        signal: AbortSignal.timeout(10000),
+      });
+      if (r.ok) return r.json();
+    } catch {}
+  }
+  throw new Error('Cannot reach GitHub API. Check your internet connection.');
+}
+
+async function rawFile(owner, repo, branch, path) {
+  const urls = [
+    `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`,
+    `https://cdn.jsdelivr.net/gh/${owner}/${repo}@${branch}/${path}`,
+  ];
+  for (const url of urls) {
+    try {
+      const r = await fetch(url, { signal: AbortSignal.timeout(8000) });
+      if (r.ok) return (await r.text()).slice(0, 3000);
+    } catch {}
+  }
+  return null;
+}
+
+async function fetchRepo(owner, repo) {
+  const meta = await ghGet(`/repos/${owner}/${repo}`);
+  const branch = meta.default_branch || 'main';
+  setP('Building file tree…', 30);
+
+  let filePaths = [];
+  try {
+    const td = await ghGet(`/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`);
+    filePaths = (td.tree||[]).filter(f=>f.type==='blob').map(f=>f.path);
+  } catch {
+    try {
+      const ct = await ghGet(`/repos/${owner}/${repo}/contents`);
+      filePaths = ct.filter(f=>f.type==='file').map(f=>f.path);
+    } catch {}
+  }
+
+  const src  = filePaths.filter(p=>/\.(py|js|ts|go|rs|java|cpp|c|rb|php|cs|swift|kt|jsx|tsx)$/.test(p));
+  const cfg  = filePaths.filter(p=>/\.(json|yaml|yml|toml|cfg|ini)$/.test(p));
+  const test = filePaths.filter(p=>/(test|spec|__test__)/.test(p.toLowerCase()));
+  setP('Reading key files…', 50);
+
+  const want = ['README.md','readme.md','package.json','requirements.txt','pyproject.toml',
+                'setup.py','Cargo.toml','go.mod','Dockerfile','docker-compose.yml','Makefile'];
+  const toFetch = [];
+  for (const w of want) {
+    const hit = filePaths.find(p=>p.toLowerCase()===w.toLowerCase()||p.endsWith('/'+w));
+    if (hit && !toFetch.includes(hit)) toFetch.push(hit);
+    if (toFetch.length >= 6) break;
+  }
+  src.slice(0,5).forEach(s=>{ if (!toFetch.includes(s)) toFetch.push(s); });
+
+  const contents = {};
+  await Promise.allSettled(toFetch.slice(0,10).map(async p => {
+    const txt = await rawFile(owner, repo, branch, p);
+    if (txt) contents[p] = txt;
+  }));
+
+  const metadata = {
+    name: meta.name, full_name: meta.full_name,
+    description: meta.description||'', language: meta.language||'',
+    stars: meta.stargazers_count||0, forks: meta.forks_count||0,
+    topics: meta.topics||[], open_issues: meta.open_issues_count||0,
+    license: meta.license?.name||'', default_branch: branch,
+  };
+
+  const ctx = [
+    `Repository: ${metadata.full_name}`,
+    `Description: ${metadata.description}`,
+    `Primary Language: ${metadata.language}`,
+    `Stars: ${metadata.stars.toLocaleString()} | Forks: ${metadata.forks.toLocaleString()} | Issues: ${metadata.open_issues}`,
+    metadata.topics.length ? `Topics: ${metadata.topics.join(', ')}` : '',
+    `License: ${metadata.license}`,
+    `\nTotal Files: ${filePaths.length}`,
+    '\n=== FILE TREE (first 200) ===', filePaths.slice(0,200).join('\n'),
+    '\n=== SOURCE FILES ===', src.slice(0,30).join('\n'),
+    '\n=== CONFIG FILES ===', cfg.slice(0,20).join('\n'),
+    '\n=== TEST FILES ===', test.slice(0,20).join('\n'),
+    '\n=== KEY FILE CONTENTS ===',
+    ...Object.entries(contents).map(([f,c])=>`\n--- ${f} ---\n${c}`),
+  ].filter(Boolean).join('\n');
+
+  return { metadata, filePaths:filePaths.slice(0,500), total:filePaths.length, ctx };
+}
+
+/* ═══════════════════════════════════════════
+   PROMPTS
+═══════════════════════════════════════════ */
+const ASYS = `You are RepoPilot AI, built using IBM watsonx Code Assistant (Bob IDE). Return ONLY valid JSON (no markdown fences, no extra text):
+{"summary":"2-3 sentence overview","architecture":{"pattern":"MVC|Microservices|Monolith|etc","description":"details","layers":["layer: description"]},"tech_stack":[{"name":"Tech","category":"Language|Framework|Database|Testing|DevOps|Tool","purpose":"role"}],"entry_points":[{"file":"path","description":"why"}],"key_modules":[{"name":"Module","path":"path","responsibility":"what"}],"dependencies":{"external":["pkg: purpose"],"internal":["relation"]},"data_flow":"Request → ... → Response","onboarding_steps":[{"step":1,"title":"Title","description":"what to do","files_to_read":["file"]}],"gotchas":["pitfall"],"quick_wins":["easy task"],"diagram_nodes":[{"id":"n1","label":"Name","type":"service|database|frontend|api|other"}],"diagram_edges":[{"from":"n1","to":"n2","label":"calls"}]}`;
+
+const GSYS = `You are RepoPilot AI, built with IBM watsonx Code Assistant (Bob IDE). Write a complete ONBOARDING.md with these sections:
+# [Project] — Developer Onboarding Guide
+## 1. Project Overview & Purpose
+## 2. Architecture Overview
+## 3. Tech Stack
+## 4. Repository Structure
+## 5. Getting Started (with code blocks)
+## 6. Key Files to Read First
+## 7. Core Concepts
+## 8. Common Workflows
+## 9. Testing Strategy
+## 10. Deployment Overview
+## 11. FAQ for New Developers
+## 12. Glossary
+Be specific to this exact repo. Use tables and code blocks.`;
+
+/* ═══════════════════════════════════════════
+   MAIN ANALYSIS
+═══════════════════════════════════════════ */
+async function runAnalysis() {
+  const url = id('f-url').value.trim();
+  if (!url) return showErr('Please paste a GitHub repository URL');
+
+  let parsed;
+  try { parsed = parseUrl(url); } catch(e) { return showErr(e.message); }
+
+  hideErr(); setBusy(true);
+  S.data=null; S.guide=null; S.history=[];
+
+  const steps=[
+    ['Connecting to GitHub…',12],
+    ['Fetching repository metadata…',25],
+    ['Building file tree…',40],
+    ['Reading key files…',55],
+    ['IBM Bob: analyzing codebase…',70],
+    ['Generating insights…',88],
+  ];
+  let si=0; setP(...steps[0]);
+  const iv=setInterval(()=>{ si=Math.min(si+1,steps.length-1); setP(...steps[si]); }, 3000);
+
+  try {
+    setP('Fetching from GitHub…',15);
+    const { metadata, filePaths, total, ctx } = await fetchRepo(parsed.owner, parsed.repo);
+
+    setP('IBM Bob + Groq: analyzing…',65);
+    const raw = await groq([
+      { role:'system', content:ASYS },
+      { role:'user',   content:`Analyze this repository:\n\n${ctx.slice(0,12000)}` },
+    ]);
+
+    clearInterval(iv); setP('Done! 🎉',100);
+    await sleep(400);
+
+    S.data = { analysis:parseJSON(raw), metadata, file_tree:filePaths, total_files:total };
+    S.ctx = ctx;
+    updateSidebar();
+    goTab('overview');
+  } catch(e) {
+    clearInterval(iv);
+    showErr(e.message);
+  } finally {
+    setBusy(false);
+    id('prog').style.display='none';
+  }
+}
+
+/* ═══════════════════════════════════════════
+   TABS & RENDER
+═══════════════════════════════════════════ */
+function goTab(t) {
+  S.tab=t;
+  document.querySelectorAll('[data-tab]').forEach(el=>el.classList.toggle('active',el.dataset.tab===t));
+  id('cbar').style.display = t==='chat' ? 'flex' : 'none';
+  render();
+}
+
+function render() {
+  const el=id('ct');
+  if (!S.data && S.tab!=='chat') { el.innerHTML=emptyHTML(); return; }
+  if (S.tab==='overview') el.innerHTML=rOverview();
+  else if (S.tab==='arch')    el.innerHTML=rArch();
+  else if (S.tab==='stack')   el.innerHTML=rStack();
+  else if (S.tab==='onboard') el.innerHTML=rOnboard();
+  else if (S.tab==='chat')    renderChat();
+  else if (S.tab==='guide')   rGuide(el);
+}
+
+/* ── Empty ── */
+function emptyHTML() {
+  return `<div class="empty">
+    <div class="eico">🧭</div>
+    <h2>Welcome to RepoPilot AI</h2>
+    <p>Paste any public GitHub URL above and get a full AI-powered codebase analysis in ~20 seconds.</p>
+    <div style="margin-top:6px;padding:8px 14px;background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.2);border-radius:8px;font-size:11.5px;color:var(--pu);display:flex;align-items:center;gap:8px">
+      <i class="fa fa-cube"></i> Built with <strong style="color:var(--pu)">IBM watsonx Code Assistant (Bob)</strong>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px">
+      <span class="tag ta">Architecture Analysis</span>
+      <span class="tag tg">Dependency Mapping</span>
+      <span class="tag tp">Ask the Codebase</span>
+      <span class="tag tam">Auto Dev Guide</span>
+    </div>
+  </div>`;
+}
+
+/* ── Overview ── */
+function rOverview() {
+  const a=S.data.analysis||{}, m=S.data.metadata||{};
+  const topics=(m.topics||[]).map(t=>`<span class="tag ta">${t}</span>`).join('');
+  const layers=(a.architecture?.layers||[]).map(l=>`<div class="layer">${l}</div>`).join('');
+  const gotchas=(a.gotchas||[]).slice(0,5).map(g=>`<div class="tip tw"><span style="flex-shrink:0">⚠️</span><span>${g}</span></div>`).join('');
+  const wins=(a.quick_wins||[]).slice(0,5).map(w=>`<div class="tip tq"><span style="flex-shrink:0">✅</span><span>${w}</span></div>`).join('');
+
+  return `
+  <div class="ibm-credit">
+    <i class="fa fa-cube"></i>
+    <span>Analysis powered by <strong>IBM watsonx Code Assistant (Bob)</strong> — all code in this tool was generated using Bob IDE for the IBM Bob Hackathon 2026.</span>
+  </div>
+  <div class="bob">
+    <i class="fa fa-robot"></i>
+    <div class="bob-t"><strong>Codebase Intelligence Active</strong><br>
+      ${S.data.total_files} files analyzed — architecture mapped, insights generated with Groq LLaMA 3.3 70B.
+    </div>
+    <div class="bob-r">${S.data.total_files} files<br>${m.language||'Multi-lang'}</div>
+  </div>
+
+  <div class="g4">
+    <div class="stat"><div class="sn">⭐ ${fmt(m.stars)}</div><div class="sl">Stars</div></div>
+    <div class="stat"><div class="sn">🍴 ${fmt(m.forks)}</div><div class="sl">Forks</div></div>
+    <div class="stat"><div class="sn">📄 ${S.data.total_files}</div><div class="sl">Files</div></div>
+    <div class="stat"><div class="sn">🐛 ${m.open_issues||0}</div><div class="sl">Issues</div></div>
+  </div>
+
+  <div class="g2 mt">
+    <div class="card">
+      <div class="chd"><i class="fa fa-file-alt" style="color:var(--ac)"></i><div class="ctit">Project Summary</div></div>
+      <p style="font-size:13px;color:var(--tx2);line-height:1.6;margin-bottom:10px">${a.summary||'No summary.'}</p>
+      ${topics?`<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px">${topics}</div>`:''}
+      ${m.license?`<span class="tag tg"><i class="fa fa-balance-scale"></i> ${m.license}</span>`:''}
+    </div>
+    <div class="card">
+      <div class="chd"><i class="fa fa-project-diagram" style="color:var(--pu)"></i><div class="ctit">Architecture</div></div>
+      <div style="margin-bottom:8px"><span class="tag tp" style="font-size:12px;padding:4px 12px">${a.architecture?.pattern||'Unknown'}</span></div>
+      <p style="font-size:12px;color:var(--tx2);margin-bottom:9px">${a.architecture?.description||''}</p>
+      ${layers}
+    </div>
+  </div>
+
+  ${a.data_flow?`<div class="card mt">
+    <div class="chd"><i class="fa fa-exchange-alt" style="color:var(--tl)"></i><div class="ctit">Data Flow</div></div>
+    <p style="font-size:12.5px;color:var(--tx2);line-height:1.6">${a.data_flow}</p>
+  </div>`:''}
+
+  <div class="g2 mt">
+    <div class="card"><div class="chd"><i class="fa fa-exclamation-triangle" style="color:var(--rd)"></i><div class="ctit">Watch Out For</div></div>${gotchas||none()}</div>
+    <div class="card"><div class="chd"><i class="fa fa-bolt" style="color:var(--gr)"></i><div class="ctit">Quick Wins</div></div>${wins||none()}</div>
+  </div>`;
+}
+
+/* ── Architecture ── */
+function rArch() {
+  const a=S.data?.analysis||{};
+  const NC=['an-a','an-p','an-g','an-am','an-t','an-r'];
+  const NI={service:'fa-cogs',database:'fa-database',frontend:'fa-desktop',api:'fa-plug',queue:'fa-list',cache:'fa-bolt',other:'fa-cube'};
+
+  const nodes=(a.diagram_nodes||[]).slice(0,12).map((n,i)=>`
+    <div class="an ${NC[i%NC.length]}" onclick="askAbout('${esc(n.label)}')">
+      <div class="an-ic"><i class="fa ${NI[n.type]||NI.other}"></i></div>
+      <div class="an-nm">${n.label}</div>
+      <div class="an-tp">${n.type||'component'}</div>
+    </div>`).join('');
+
+  const edges=(a.diagram_edges||[]).slice(0,10).map(e=>`
+    <div class="edge">
+      <span class="efr">${e.from}</span>
+      <i class="fa fa-arrow-right" style="color:var(--tx3);font-size:10px"></i>
+      <span class="eto">${e.to}</span>
+      ${e.label?`<span class="elb">${e.label}</span>`:''}
+    </div>`).join('');
+
+  const entries=(a.entry_points||[]).map(e=>`
+    <div class="entry"><i class="fa fa-door-open"></i>
+      <div><div class="ef">${e.file}</div><div class="ed">${e.description}</div></div>
+    </div>`).join('');
+
+  const mods=(a.key_modules||[]).map(m=>`
+    <div class="mod">
+      <div class="mod-ic"><i class="fa fa-folder-open" style="color:var(--ac)"></i></div>
+      <div><div class="mn">${m.name}</div><div class="mp">${m.path||''}</div><div class="mr">${m.responsibility}</div></div>
+    </div>`).join('');
+
+  return `
+  <div class="stitle"><i class="fa fa-sitemap"></i> System Architecture</div>
+  ${nodes?`<div class="card" style="margin-bottom:12px">
+    <div class="chd"><i class="fa fa-th" style="color:var(--ac)"></i><div class="ctit">Component Map</div></div>
+    <div class="ng">${nodes}</div>
+    <div style="font-size:11px;color:var(--tx3);margin-top:8px"><i class="fa fa-info-circle"></i> Click any component to ask AI about it</div>
+  </div>`:''}
+  ${edges?`<div class="card" style="margin-bottom:12px">
+    <div class="chd"><i class="fa fa-arrows-alt-h" style="color:var(--tl)"></i><div class="ctit">Relationships</div></div>${edges}
+  </div>`:''}
+  <div class="g2">
+    ${entries?`<div class="card"><div class="chd"><i class="fa fa-door-open" style="color:var(--am)"></i><div class="ctit">Entry Points</div></div>${entries}</div>`:''}
+    ${mods?`<div class="card"><div class="chd"><i class="fa fa-cubes" style="color:var(--pu)"></i><div class="ctit">Key Modules</div></div>${mods}</div>`:''}
+  </div>`;
+}
+
+/* ── Stack ── */
+function rStack() {
+  const a=S.data?.analysis||{};
+  const CI={'Language':'fa-code','Framework':'fa-layer-group','Database':'fa-database',
+             'Testing':'fa-vial','Build':'fa-hammer','DevOps':'fa-server','API':'fa-plug','Tool':'fa-wrench'};
+
+  const techs=(a.tech_stack||[]).map(t=>{
+    const ico=Object.entries(CI).find(([k])=>(t.category||'').includes(k))?.[1]||'fa-cube';
+    return `<div class="tech">
+      <div class="tic"><i class="fa ${ico}" style="color:var(--ac)"></i></div>
+      <div><div class="tnm">${t.name}</div><div class="tct">${t.category}</div><div class="tpu">${t.purpose||''}</div></div>
+    </div>`;
+  }).join('');
+
+  const ext=(a.dependencies?.external||[]).map(d=>{
+    const [n,...r]=d.split(':');
+    return `<div class="dep"><div class="dnm">${n.trim()}</div><div class="dpu">${r.join(':').trim()||'dependency'}</div></div>`;
+  }).join('');
+
+  const int_=(a.dependencies?.internal||[]).map(d=>`<div class="dep"><div class="dpu">${d}</div></div>`).join('');
+
+  return `
+  <div class="stitle"><i class="fa fa-layer-group"></i> Technology Stack</div>
+  <div class="card" style="margin-bottom:12px">
+    <div class="chd"><i class="fa fa-tools" style="color:var(--ac)"></i><div class="ctit">Tools & Technologies</div></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:8px">${techs||none()}</div>
+  </div>
+  <div class="g2">
+    ${ext?`<div class="card"><div class="chd"><i class="fa fa-external-link-alt" style="color:var(--am)"></i><div class="ctit">External Deps</div></div>${ext}</div>`:''}
+    ${int_?`<div class="card"><div class="chd"><i class="fa fa-link" style="color:var(--tl)"></i><div class="ctit">Internal Structure</div></div>${int_}</div>`:''}
+  </div>`;
+}
+
+/* ── Onboarding ── */
+function rOnboard() {
+  const a=S.data?.analysis||{};
+  const steps=(a.onboarding_steps||[]).map(s=>`
+    <div class="step">
+      <div class="snum">${s.step}</div>
+      <div>
+        <div class="sh">${s.title}</div>
+        <div class="sd">${s.description}</div>
+        ${(s.files_to_read||[]).length?`<div class="sf">${s.files_to_read.map(f=>`<span class="fc">${f}</span>`).join('')}</div>`:''}
+      </div>
+    </div>`).join('');
+
+  return `
+  <div class="stitle"><i class="fa fa-map-signs"></i> Developer Onboarding Path</div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="chd"><i class="fa fa-route" style="color:var(--ac)"></i><div class="ctit">Your First Week — Step by Step</div></div>
+    <p style="font-size:12px;color:var(--tx2);margin-bottom:12px">IBM Bob mapped this path so you can understand the codebase without bothering senior devs.</p>
+    ${steps||none()}
+  </div>
+  <div style="text-align:center;padding-bottom:8px">
+    <button class="btn btn-p" onclick="genGuide(this)"><i class="fa fa-book"></i> Generate Full Dev Guide</button>
+    <p style="font-size:11px;color:var(--tx3);margin-top:6px">Creates a complete ONBOARDING.md you can save to the repo</p>
+  </div>`;
+}
+
+/* ── Chat ── */
+function renderChat() {
+  const el=id('ct');
+  if (!S.data) { el.innerHTML=`<div class="empty"><div class="eico">💬</div><h2>No repo loaded</h2><p>Analyze a repository first, then ask anything about it.</p></div>`; return; }
+  if (!id('cwrap')) el.innerHTML=`<div id="cwrap"></div>`;
+  const cw=id('cwrap');
+
+  if (S.history.length===0) {
+    cw.innerHTML=`
+      <div style="font-size:12px;color:var(--tx2);padding:4px 0 10px">
+        <i class="fa fa-comments" style="color:var(--ac)"></i>&nbsp;
+        Ask anything about <strong style="color:var(--tx)">${S.data.metadata?.full_name||'this repo'}</strong>
+      </div>
+      <div class="chips">
+        ${['What is the main entry point?','How is authentication handled?','Explain the folder structure','How do I run tests?','What does the middleware do?','How do I add a new endpoint?','Explain the data models','What are the coding conventions?']
+          .map(q=>`<div class="chip" onclick="quickAsk('${q}')">${q}</div>`).join('')}
+      </div>`;
+  } else {
+    cw.innerHTML=S.history.map(m=>`
+      <div class="msg ${m.role}">
+        <div class="av ${m.role==='assistant'?'av-ai':'av-u'}">${m.role==='assistant'?'🤖':'👤'}</div>
+        <div class="bub">${m.content==='__spin__'?'<span class="spin"></span>':m.role==='assistant'?marked.parse(m.content):esc(m.content)}</div>
+      </div>`).join('');
+    requestAnimationFrame(()=>{ cw.scrollTop=cw.scrollHeight; });
+  }
+}
+
+async function sendChat() {
+  const inp=id('cinput'), q=inp.value.trim();
+  if (!q||!S.data) return;
+  inp.value=''; inp.style.height='auto';
+  S.history.push({role:'user',content:q});
+  S.history.push({role:'assistant',content:'__spin__'});
+  renderChat();
+  try {
+    const ans = await groq([
+      {role:'system',content:`You are RepoPilot AI, built with IBM watsonx Code Assistant (Bob). You know this entire codebase. Answer precisely and cite file paths.\n\nCONTEXT:\n${S.ctx.slice(0,8000)}`},
+      ...S.history.slice(0,-2).slice(-10),
+      {role:'user',content:q},
+    ], 2048);
+    S.history[S.history.length-1]={role:'assistant',content:ans};
+  } catch(e) {
+    S.history[S.history.length-1]={role:'assistant',content:`❌ ${e.message}`};
+  }
+  renderChat();
+}
+
+async function quickAsk(q){id('cinput').value=q;await sendChat();}
+function askAbout(c){goTab('chat');id('cinput').value=`Explain the "${c}" component — what it does, where it lives, and how it connects to everything else.`;}
+
+/* ── Guide ── */
+function rGuide(el) {
+  if (!S.guide) {
+    el.innerHTML=`<div class="empty">
+      <div class="eico">📖</div><h2>Developer Guide</h2>
+      <p>Generate a full ONBOARDING.md — setup, architecture, workflows, FAQ and glossary.</p>
+      ${S.data?`<button class="btn btn-p" style="margin-top:8px" onclick="genGuide(this)"><i class="fa fa-book"></i> Generate Guide</button>`
+              :`<p style="color:var(--tx3);font-size:12px;margin-top:4px">Analyze a repo first</p>`}
+    </div>`;
+    return;
+  }
+  el.innerHTML=`
+    <div style="display:flex;align-items:center;gap:9px;margin-bottom:14px">
+      <div class="stitle" style="margin:0"><i class="fa fa-book"></i> Developer Onboarding Guide</div>
+      <button class="btn btn-g btn-sm" onclick="dlGuide()"><i class="fa fa-download"></i> Download .md</button>
+      <button class="btn btn-g btn-sm" onclick="copyGuide(this)"><i class="fa fa-copy"></i> Copy</button>
+      <button class="btn btn-g btn-sm" onclick="S.guide=null;render()"><i class="fa fa-redo"></i> Redo</button>
+    </div>
+    <div class="card"><div class="mdb">${marked.parse(S.guide)}</div></div>`;
+}
+
+async function genGuide(btn) {
+  if (S.guide){goTab('guide');render();return;}
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span> Generating…';
+  try {
+    S.guide = await groq([
+      {role:'system',content:GSYS},
+      {role:'user',  content:`Generate the full onboarding guide for:\n\n${S.ctx.slice(0,12000)}`},
+    ], 4096);
+    goTab('guide'); render();
+  } catch(e) { showErr('Guide failed: '+e.message); }
+  finally { btn.disabled=false; btn.innerHTML='<i class="fa fa-book"></i> Generate Full Dev Guide'; }
+}
+
+/* ── Sidebar ── */
+function updateSidebar() {
+  const m=S.data?.metadata||{};
+  id('sb-rl').style.display='block';
+  id('sb-ft').style.display='block';
+  id('sb-rn').textContent=m.full_name||'Repository';
+  id('sb-st').innerHTML=`<span>⭐${fmt(m.stars)}</span><span>🍴${fmt(m.forks)}</span><span>📄${S.data.total_files}</span>`;
+  const dirs=[...new Set((S.data.file_tree||[]).filter(p=>p.includes('/')).map(p=>p.split('/')[0]))].slice(0,10);
+  const roots=(S.data.file_tree||[]).filter(p=>!p.includes('/')).slice(0,8);
+  id('sb-tr').innerHTML=dirs.map(d=>`<div class="tr-r tr-d">📁 ${d}/</div>`).join('')+roots.map(f=>`<div class="tr-r">📄 ${f}</div>`).join('');
+}
+
+/* ═══════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════ */
+const id    = x => document.getElementById(x);
+const esc   = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const fmt   = n => (n||0).toLocaleString();
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+const none  = () => '<div style="color:var(--tx3);font-size:12px">None identified</div>';
+function setRepo(u){id('f-url').value=u;}
+function setP(t,p){id('ptxt').textContent=t;id('pfill').style.width=p+'%';}
+function setBusy(v){
+  const b=id('abtn'); b.disabled=v;
+  b.innerHTML=v?'<span class="spin"></span> Analyzing…':'<i class="fa fa-rocket"></i> Analyze Repo';
+  id('prog').style.display=v?'block':'none';
+}
+function showErr(m){const b=id('errbox');id('errtxt').textContent=m;b.style.display='flex';}
+function hideErr(){id('errbox').style.display='none';}
+function ck(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}}
+function ar(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,88)+'px';}
+function dlGuide(){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([S.guide],{type:'text/markdown'}));
+  a.download='ONBOARDING.md'; a.click();
+}
+function copyGuide(btn){
+  navigator.clipboard.writeText(S.guide);
+  btn.innerHTML='<i class="fa fa-check"></i> Copied!';
+  setTimeout(()=>btn.innerHTML='<i class="fa fa-copy"></i> Copy',2000);
+}
+
+// BOOT
+render();
+</script>
+</body>
+</html>
