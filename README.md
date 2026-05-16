@@ -17,6 +17,25 @@ RepoPilot AI is a single-page web application that uses AI to analyze GitHub rep
 - 📚 **Onboarding Guide** - Auto-generate developer onboarding documentation
 - 🎨 **Modern UI** - Beautiful dark theme with smooth animations
 
+
+## 🚀 ScreenShot
+
+### IBM Bob Login Page
+<img width="1600" height="780" alt="WhatsApp Image 2026-05-17 at 1 22 23 AM" src="https://github.com/user-attachments/assets/12128c1f-ab89-4cc9-9f21-fe1a6d4b8195" />
+
+### Task 1
+<img width="1600" height="927" alt="WhatsApp Image 2026-05-17 at 1 16 29 AM" src="https://github.com/user-attachments/assets/2a5f86f3-0a94-46a2-8149-0c24345d142a" />
+
+### Task 2
+<img width="1600" height="927" alt="WhatsApp Image 2026-05-17 at 1 16 29 AM" src="https://github.com/user-attachments/assets/49fcd74c-b0e0-482a-bf6d-9e473ba084ec" />
+
+### Task 3
+<img width="1600" height="909" alt="WhatsApp Image 2026-05-17 at 1 18 16 AM" src="https://github.com/user-attachments/assets/30e17694-b256-4b06-897b-9c4e682f13ed" />
+
+### Task 4
+<img width="1600" height="898" alt="WhatsApp Image 2026-05-17 at 1 20 13 AM" src="https://github.com/user-attachments/assets/3fd25323-6a7c-4b51-a5e4-2bae5e8c7c25" />
+
+
 ## 🚀 Quick Start
 
 ### Prerequisites
