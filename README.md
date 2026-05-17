@@ -1,4 +1,4 @@
-# 🧭 RepoPilot AI
+# 🧭 RepoPilot-AI
 
 > AI-powered GitHub repository analyzer built for IBM Bob Hackathon 2026
 
